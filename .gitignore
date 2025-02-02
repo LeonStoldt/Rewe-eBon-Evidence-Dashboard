@@ -1,0 +1,11 @@
+.evidence
+.svelte-kit
+build
+node_modules
+.DS_Store
+static/data
+static/ebons/**
+*.options.yaml
+.vscode/settings.json
+.env
+.idea
