@@ -8,9 +8,11 @@ SELECT
     JSON_EXTRACT_STRING(marketAddress::JSON, '$.street') AS street,
     JSON_EXTRACT_STRING(marketAddress::JSON, '$.zip') AS zip,
     JSON_EXTRACT_STRING(marketAddress::JSON, '$.city') AS city,
+    JSON_EXTRACT(marketAddress::JSON, '$.lat')::DOUBLE AS latitude,
+    JSON_EXTRACT(marketAddress::JSON, '$.lon')::DOUBLE AS longitude,
     COUNT(*) AS visited
 FROM rewe_ebon_extractor
-GROUP BY 1,2,3,4
+GROUP BY 1,2,3,4,5,6
 ```
 
 ```sql items
@@ -238,5 +240,13 @@ ORDER BY amount DESC
 ---
 
 ## Top Markets visited
+
+<BubbleMap
+data={marketData}
+lat=latitude
+long=longitude
+size=visited
+pointName=street
+/>
 
 <DataTable data={marketData}/>
