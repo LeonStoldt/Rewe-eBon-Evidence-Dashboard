@@ -13,15 +13,19 @@ async function getLatLong(city, zip, street) {
         return geoCache.get(query);
     }
 
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-    if (data.length > 0) {
-        const latLong = { lat: data[0].lat, lon: data[0].lon };
-        geoCache.set(query, latLong);
-        console.log(`Geocoded: ${city}, ${zip}, ${street} → lat: ${latLong.lat}, lon: ${latLong.lon}`);
-        return latLong;
+        if (data.length > 0) {
+            const latLong = { lat: data[0].lat, lon: data[0].lon };
+            geoCache.set(query, latLong);
+            console.log(`Geocoded: ${city}, ${zip}, ${street} → lat: ${latLong.lat}, lon: ${latLong.lon}`);
+            return latLong;
+        }
+    } catch (error) {
+        console.error(`Error fetching geolocation: ${error}`);
     }
 
     console.error(`Could not find geolocation for: ${city}, ${zip}, ${street}`);

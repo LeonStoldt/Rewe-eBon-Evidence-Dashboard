@@ -69,24 +69,41 @@ FROM
 ---
 
 ```sql total_spent_by_month
+WITH MonthlySpending AS (
+    SELECT 
+        DATE_PART('month', orderTime::TIMESTAMP) AS orderMonth,
+        DATE_PART('year', orderTime::TIMESTAMP) AS orderYear,
+        SUM(itemSubTotal) AS totalSpent
+    FROM ${orderPositions}
+    WHERE orderTime >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '2 months'
+    GROUP BY orderYear, orderMonth
+),
+CurrentMonthSpending AS (
+    SELECT totalSpent AS currentMonthSpent
+    FROM MonthlySpending
+    WHERE orderMonth = DATE_PART('month', CURRENT_DATE)
+),
+PreviousMonthSpending AS (
+    SELECT totalSpent AS lastMonthSpent
+    FROM MonthlySpending
+    WHERE orderMonth = DATE_PART('month', CURRENT_DATE - INTERVAL '1 month')
+),
+TwoMonthsAgoSpending AS (
+    SELECT totalSpent AS lastMonthSpentComparison
+    FROM MonthlySpending
+    WHERE orderMonth = DATE_PART('month', CURRENT_DATE - INTERVAL '2 months')
+)
 SELECT 
-    SUM(CASE 
-        WHEN DATE_PART('month', orderTime::TIMESTAMP) = DATE_PART('month', CURRENT_DATE)
-        THEN itemSubTotal
-        ELSE 0
-    END) AS currentMonthSpent,
-    SUM(CASE 
-        WHEN DATE_PART('month', orderTime::TIMESTAMP) = DATE_PART('month', CURRENT_DATE - INTERVAL '1 month')
-        THEN itemSubTotal
-        ELSE 0
-    END) AS lastMonthSpent,
-    SUM(CASE 
-        WHEN DATE_PART('month', orderTime::TIMESTAMP) = DATE_PART('month', CURRENT_DATE - INTERVAL '2 month')
-        THEN itemSubTotal
-        ELSE 0
-    END) AS lastMonthSpentComparison
-FROM ${orderPositions}
-WHERE orderTime >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '2 month';
+    CurrentMonthSpending.currentMonthSpent,
+    PreviousMonthSpending.lastMonthSpent,
+    CASE 
+        WHEN TwoMonthsAgoSpending.lastMonthSpentComparison > 0 
+        THEN (PreviousMonthSpending.lastMonthSpent - TwoMonthsAgoSpending.lastMonthSpentComparison) / TwoMonthsAgoSpending.lastMonthSpentComparison
+        ELSE NULL
+    END AS lastMonthSpentChangePercentage
+FROM CurrentMonthSpending
+LEFT JOIN PreviousMonthSpending ON true
+LEFT JOIN TwoMonthsAgoSpending ON true;
 ```
 
 ```sql latest_order_position
@@ -104,8 +121,9 @@ value=currentMonthSpent
 title='Spent (Last Month)'
 data={total_spent_by_month}
 value=lastMonthSpent
-comparison=lastMonthSpentComparison
+comparison=lastMonthSpentChangePercentage
 comparisonTitle="vs. Month before"
+comparisonFmt=pct1
 downIsGood=true
 />
 
@@ -249,4 +267,8 @@ size=visited
 pointName=street
 />
 
-<DataTable data={marketData}/>
+```sql visited_per_market
+SELECT street, zip, city, visited FROM ${marketData}  
+```
+
+<DataTable data={visited_per_market}/>
