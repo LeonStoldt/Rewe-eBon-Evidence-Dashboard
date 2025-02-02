@@ -9,3 +9,4 @@ static/ebons/**
 .vscode/settings.json
 .env
 .idea
+!.gitkeep

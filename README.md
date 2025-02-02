@@ -1,5 +1,9 @@
 # REWE eBon Evidence Dashboard
 
+## How to run
+1. Download your eBons (as pdf) into [eBon-folder](./static/ebons)
+2. Run `make start` (or equivalent npm commands)
+
 ## What is it for?
 REWE (German food retail company) provides a service called '[eBon](https://www.rewe.de/service/ebon/)', where customers can receive their receipts digitally.
 These receipts can be downloaded in the [REWE user portal](https://shop.rewe.de/mydata/meine-einkaeufe/im-markt).
