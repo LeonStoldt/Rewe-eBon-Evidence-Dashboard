@@ -1,51 +1,34 @@
-# Evidence Template Project
+# REWE eBon Evidence Dashboard
 
-## Using Codespaces
-
-If you are using this template in Codespaces, click the `Start Evidence` button in the bottom status bar. This will install dependencies and open a preview of your project in your browser - you should get a popup prompting you to open in browser.
-
-Or you can use the following commands to get started:
-
-```bash
-npm install
-npm run sources
-npm run dev -- --host 0.0.0.0
+## What is it for?
+REWE (German food retail company) provides a service called '[eBon](https://www.rewe.de/service/ebon/)', where customers can receive their receipts digitally.
+These receipts can be downloaded in the [REWE user portal](https://shop.rewe.de/mydata/meine-einkaeufe/im-markt).
+Currently, available formats are `pdf` and `csv`.
+While `csv` sounds good for automatic processing, the file looks something like this:
+```csv
+"Datum","Uhrzeit","Gesamtsumme"
+"01.02.2025","18:02:25","37,24"
 ```
 
-See [the CLI docs](https://docs.evidence.dev/cli/) for more command information.
+Instead, the `pdf` file contains all data and [webD97](https://github.com/webD97) created a javascript library for parsing eBon pdf files into JSON ([rewe-ebon-parser](https://github.com/webD97/rewe-ebon-parser)).
 
-**Note:** Codespaces is much faster on the Desktop app. After the Codespace has booted, select the hamburger menu → Open in VS Code Desktop.
+For displaying the data in a dashboard, I went with evidence as it is easy to query data (using sql) and already provides lots of visualizations to analyzing your data.
+Additionally, evidence provides a [JavaScript datasource](https://docs.evidence.dev/core-concepts/data-sources/javascript/) which can run arbitrary JavaScript code as a data source.
+In order to create an MVP, I went with a small [script](./sources/rewe_ebon_extractor/rewe_ebon_extractor.js) for parsing my eBon pdf files into queryable data.   
 
-## Get Started from VS Code
+## Long-term solution
+In the long run, it makes more sense to query the data directly from the REWE api. First research results are:
 
-The easiest way to get started is using the [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=Evidence.evidence-vscode):
+1. Rewe Login token might be received via `curl 'https://account.rewe.de/realms/sso/login-actions/authenticate' --data-raw 'username=test%40test.de&password=test&rememberMe=on'`
+2. `https://shop.rewe.de/api/receipts/` shows all receipts as overview with RSTP token (example which uses api: https://github.com/Craze1997/grocy-rewe-connect/blob/main/main.py)
+3. `https://shop.rewe.de/api/receipts/<UUID>` shows complete receipt
+4. a custom evidence datasource provider can be written including parameter handling for REWE login
 
+## Related
 
-
-1. Install the extension from the VS Code Marketplace
-2. Open the Command Palette (Ctrl/Cmd + Shift + P) and enter `Evidence: New Evidence Project`
-3. Click `Start Evidence` in the bottom status bar
-
-## Get Started using the CLI
-
-```bash
-npx degit evidence-dev/template my-project
-cd my-project 
-npm install 
-npm run sources
-npm run dev 
-```
-
-Check out the docs for [alternative install methods](https://docs.evidence.dev/getting-started/install-evidence) including Docker, Github Codespaces, and alongside dbt.
-
-
-
-## Learning More
-
-- [Docs](https://docs.evidence.dev/)
-- [Github](https://github.com/evidence-dev/evidence)
-- [Slack Community](https://slack.evidence.dev/)
+- [Rewe eBon parser library](https://github.com/webD97/rewe-ebon-parser)
+- [Grocy Rewe Connect](https://github.com/Craze1997/grocy-rewe-connect)
 - [Evidence Home Page](https://www.evidence.dev)
-
----
-https://duckdb.org/docs/data/json/json_functions.html
+- [Evidence Docs](https://docs.evidence.dev)
+- [DuckDB Docs](https://duckdb.org/docs)
+- [DuckDB JSON Functions](https://duckdb.org/docs/data/json/json_functions.html)
