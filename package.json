@@ -19,7 +19,7 @@
     "@evidence-dev/core-components": "^5.1.0",
     "@evidence-dev/evidence": "^40.0.6",
     "@evidence-dev/source-javascript": "^0.0.2",
-    "rewe-ebon-parser": "^0.4.0"
+    "rewe-ebon-parser": "^0.5.0"
   },
   "overrides": {
     "jsonwebtoken": "9.0.0",
